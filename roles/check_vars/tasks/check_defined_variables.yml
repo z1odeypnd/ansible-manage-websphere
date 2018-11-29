@@ -1,0 +1,12 @@
+# check_defined_variables.yml
+---
+- name: websphere_profiles_path must be defined
+  assert:
+    that:
+    - websphere_profiles_path is defined and websphere_profiles_path != ''
+    msg: "Set the value of 'websphere_profiles_path' variable in the inventory file."
+  tags:
+    - stop
+    - restart
+    - start
+...

@@ -1,0 +1,111 @@
+# {{ ansible_managed }}
+from oracle.jdbc.pool import OracleDataSource
+import sys
+import java.sql.SQLException
+import base64
+
+
+def decode_xor_password(password):
+  ans = []
+  dec_pass = base64.decodestring(password.replace("{xor}", ""))
+  for c in dec_pass:
+    ans.append(chr(ord(c)^ord('_')))
+  return ''.join(ans)
+
+
+def oracle_exec_statement(oracle_ds_object, db_cred_dict, statement):
+  for each_db in db_cred_dict:
+    db_url = "jdbc:oracle:thin:@%s:%s:%s" % (each_db['db_server'], 
+                                             each_db['db_port'], 
+                                             each_db['db_sid'])
+    
+    if each_db['db_password'].startswith('{xor}'):
+      db_pass = decode_xor_password(each_db['db_password'])
+    else:
+      db_pass = each_db['db_password']
+    
+    oracle_ds_object.setURL(db_url)
+    oracle_ds_object.setUser(each_db['db_user'])
+    oracle_ds_object.setPassword(db_pass)
+
+    try:
+      db_conn = oracle_ds_object.getConnection()
+      try:
+        stmt = db_conn.createStatement()
+        for each_statement in statement:
+          print("Exec: '%s' on '%s/%s'" % (each_statement, db_url, each_db['db_user']))
+          stmt.execute(each_statement)
+      except java.sql.SQLException, ex:
+        print("Fail execute statement on '%s/%s' with error:\n\t%s" % (db_url, each_db['db_user'], ex))
+        pass
+      
+      if stmt is not None:
+        stmt.close()
+    except java.sql.SQLException, ex:
+      print("Connection failed to '%s/%s' with error:\n\t%s" % (db_url, each_db['db_user'], ex))
+      pass
+    
+    if db_conn is not None:
+      db_conn.close()
+
+
+def main():
+  """
+  Datasource credentials dictionary
+  Example: 
+  sib_dbs = [{ 
+  'db_server':"dbserver.oracle.com", 
+  'db_port':"1521", 
+  'db_sid':"ORCL", 
+  'db_user':"WPS_BPCMSG",
+  'db_password':"WPS_BPCMSG" 
+  }, { 
+  'db_server':"dbserver.oracle.com", 
+  'db_port':"1521", 
+  'db_sid':"ORCL", 
+  'db_user':"WPS_CEIMSG",
+  'db_password':"WPS_CEIMSG" 
+  }]
+  """
+  
+  sib_dbs = [{% for jinja_ds in datasources.sib_dbs %}{
+  'db_server':"{{ jinja_ds.db_server }}",
+  'db_port':"{{ jinja_ds.db_port }}",
+  'db_sid':"{{ jinja_ds.db_sid }}",
+  'db_user':"{{ jinja_ds.db_user }}",
+  'db_password':"{{ jinja_ds.db_password }}"
+  }{% if not loop.last %}, {% endif %}{% endfor %}]
+  event_dbs = [{% for jinja_ds in datasources.events_dbs %}{
+  'db_server':"{{ jinja_ds.db_server }}",
+  'db_port':"{{ jinja_ds.db_port }}",
+  'db_sid':"{{ jinja_ds.db_sid }}",
+  'db_user':"{{ jinja_ds.db_user }}",
+  'db_password':"{{ jinja_ds.db_password }}"
+  }{% if not loop.last %}, {% endif %}{% endfor %}]
+  # Prepare statements
+  sib_statement = [
+  'TRUNCATE TABLE SIB000',
+  'TRUNCATE TABLE SIB001',
+  'TRUNCATE TABLE SIB002']
+  fem_statement = [
+  'ALTER TABLE FAILEDEVENTDETAIL DISABLE CONSTRAINT FK_FAILEDEVENTDTL',
+  'ALTER TABLE FAILEDEVENTBOTYPES DISABLE CONSTRAINT FK_FAILEDEVENTBO',
+  'TRUNCATE TABLE FAILEDEVENTBOTYPES',
+  'TRUNCATE TABLE FAILEDEVENTDETAIL',
+  'TRUNCATE TABLE FAILEDEVENTMESSAGE',
+  'DELETE FROM FAILEDEVENTS',
+  'ALTER TABLE FAILEDEVENTDETAIL ENABLE CONSTRAINT FK_FAILEDEVENTDTL',
+  'ALTER TABLE FAILEDEVENTBOTYPES ENABLE CONSTRAINT FK_FAILEDEVENTBO',
+  'COMMIT']
+  
+  # Create datasource object
+  oracle_ds_object = OracleDataSource()
+  # Clean SIB tables
+  oracle_exec_statement(oracle_ds_object, sib_dbs, sib_statement)
+  # Clean Failed Events table
+  oracle_exec_statement(oracle_ds_object, event_dbs, fem_statement)
+  # delSavedEngine = "truncate table SAVED_ENGINE_MESSAGE_B_T"
+  return 0
+
+sys.exit(main())
+

@@ -1,0 +1,33 @@
+# roles/cleanup_profile_temp/tasks/main.yml
+---
+- name: Cleanup dmgr temp directories
+  file:
+    path: "{{ websphere_profiles_path }}/{{ dmgr_profile_name }}/{{ item.tmp_dir_path }}"
+    state: absent
+    force: yes
+    unsafe_writes: yes
+  loop: 
+    "{{ temp_dirs }}"
+  when:
+    ( dmgr_profile_name is defined )
+  tags:
+    - stop
+    - restart
+    - start
+
+- name: Cleanup nodes temp directories
+  file:
+    path: "{{ websphere_profiles_path }}/{{ node_profile_name }}/{{ item.tmp_dir_path }}"
+    state: absent
+    force: yes
+    unsafe_writes: yes
+  loop: 
+    "{{ temp_dirs }}"
+  when:
+    ( nodeagent_state == 'stopped'
+    and node_profile_name is defined )
+  tags:
+    - stop
+    - restart
+    - start
+...

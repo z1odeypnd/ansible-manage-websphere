@@ -1,0 +1,15 @@
+# main.yml
+---
+- name: stop dmgr process
+  shell: "{{ websphere_profiles_path }}/{{ dmgr_profile_name }}/bin/stopManager.sh \
+    -username {{ dmgr_bus_user }} -password {{ dmgr_bus_password }}"
+  no_log: True
+  when:
+    ( dmgr_state == 'running'
+    and nodeagent_state == 'stopped'
+    and appclusters_state == 'stopped' )
+  tags:
+    - stop
+    - restart
+    - dmgr
+...

@@ -1,0 +1,13 @@
+# main.yml
+---
+- name: stop nodes processes
+  shell: "{{ websphere_profiles_path }}/{{ node_profile_name }}/bin/stopNode.sh \
+    -username {{ dmgr_bus_user }} -password {{ dmgr_bus_password }}"
+  no_log: True
+  when:
+    ( nodeagent_state == 'running' )
+  tags:
+    - stop
+    - restart
+    - nodes
+...

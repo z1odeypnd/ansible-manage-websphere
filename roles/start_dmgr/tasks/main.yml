@@ -1,0 +1,14 @@
+# main.yml
+---
+- name: start dmgr process
+  shell: "{{ websphere_profiles_path }}/{{ dmgr_profile_name }}/bin/startManager.sh \
+    -username {{ dmgr_bus_user }} -password {{ dmgr_bus_password }}"
+  no_log: True
+  when:
+    ( start_bus is defined
+    and dmgr_state == 'stopped' )
+  tags:
+    - start
+    - restart
+    - dmgr
+...

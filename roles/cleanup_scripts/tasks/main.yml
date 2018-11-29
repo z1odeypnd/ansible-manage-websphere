@@ -1,0 +1,13 @@
+# main.yml
+---
+- name: cleanup directory for ansible scripts
+  file:
+    path: "{{ ansible_scripts_directory }}"
+    state: absent
+    force: yes
+    unsafe_writes: yes
+  tags:
+    - stop
+    - restart
+    - start
+...

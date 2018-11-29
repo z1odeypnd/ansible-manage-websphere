@@ -1,0 +1,39 @@
+# main.yml
+---
+- name: create directory for ansible scripts
+  file:
+    path: "{{ ansible_scripts_directory }}"
+    state: directory
+    mode: '0775'
+    unsafe_writes: yes
+  tags:
+    - stop
+    - restart
+    - appclusters
+
+- name: create dmgr script
+  template:
+    src: "wsadmin_manage_appclusters.py.j2"
+    dest: "{{ ansible_scripts_directory }}/wsadmin_manage_appclusters.py"
+    follow: yes
+    mode: 0644
+    newline_sequence: "\n"
+    owner: "{{ websphere.os_user }}"
+    group: "{{ websphere.os_group }}"
+  tags:
+    - stop
+    - restart
+    - appclusters
+
+- name: stop appclusters
+  shell: "{{ websphere_profiles_path}}/{{ dmgr_profile_name }}/bin/wsadmin.sh \
+    -lang jython -username {{ dmgr_bus_user }} -password {{ dmgr_bus_password }} \
+    -f {{ ansible_scripts_directory }}/wsadmin_manage_appclusters.py stop"
+  no_log: True
+  when:
+    ( dmgr_state == 'running' )
+  tags:
+    - stop
+    - restart
+    - appclusters
+...

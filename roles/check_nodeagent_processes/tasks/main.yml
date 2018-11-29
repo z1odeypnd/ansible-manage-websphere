@@ -1,0 +1,34 @@
+# main.yml
+---
+- name: search running nodes
+  shell: ps -aef | egrep "java.*{{ websphere_profiles_path }}/{{ node_profile_name }}.*{{ node_profile_name }}.*nodeagent$" | grep -v grep
+  register: nodes_proc_search
+  ignore_errors: yes
+  tags:
+    - stop
+    - restart
+    - start
+    - check
+
+- name: define nodeagent is running
+  set_fact:
+    nodeagent_state: 'running'
+  when:
+    ( nodes_proc_search.rc == 0 )
+  tags:
+    - stop
+    - restart
+    - start
+    - check
+
+- name: define nodeagent is stopped
+  set_fact:
+    nodeagent_state: 'stopped'
+  when:
+    ( nodes_proc_search.rc == 1 )
+  tags:
+    - stop
+    - restart
+    - start
+    - check
+...

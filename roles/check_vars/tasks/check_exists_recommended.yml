@@ -1,0 +1,21 @@
+# check_exists_recommended.yml
+---
+- name: websphere_profiles_path must be exist
+  stat:
+    path: "{{ websphere_profiles_path }}"
+  register: stat_result
+  tags:
+    - stop
+    - restart
+    - start
+  
+- name: fail if websphere_profiles_path not exist
+  fail:
+    msg: "websphere_profiles_path {{ websphere_profiles_path }} not exist!"
+  when: 
+    ( stat_result.stat.exists == False )
+  tags:
+    - stop
+    - restart
+    - start
+...

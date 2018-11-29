@@ -1,0 +1,34 @@
+# main.yml
+---
+- name: search running dmgr
+  shell: ps -aef | egrep "java.*{{ websphere_profiles_path }}/{{ dmgr_profile_name }}.*{{ dmgr_profile_name }}.*$" | grep -v grep
+  register: dmgr_proc_search
+  ignore_errors: yes
+  tags:
+    - stop
+    - restart
+    - start
+    - check
+
+- name: define dmgr is running
+  set_fact:
+    dmgr_state: 'running'
+  when:
+    ( dmgr_proc_search.rc == 0 )
+  tags:
+    - stop
+    - restart
+    - start
+    - check
+
+- name: define dmgr is stopped
+  set_fact:
+    dmgr_state: 'stopped'
+  when:
+    ( dmgr_proc_search.rc == 1 )
+  tags:
+    - stop
+    - restart
+    - start
+    - check
+...

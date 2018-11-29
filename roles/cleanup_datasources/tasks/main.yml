@@ -1,0 +1,56 @@
+# main.yml
+---
+- name: create directory for ansible scripts
+  file:
+    path: "{{ ansible_scripts_directory }}"
+    state: directory
+    mode: 0775
+    unsafe_writes: yes
+  tags:
+    - stop
+    - restart
+    - start
+
+- name: create dmgr script
+  template:
+    src: "cleanup_databases.py.j2"
+    dest: "{{ ansible_scripts_directory }}/cleanup_databases.py"
+    follow: yes
+    mode: 0644
+    newline_sequence: "\n"
+    owner: "{{ websphere.os_user }}"
+    group: "{{ websphere.os_group }}"
+  no_log: True
+  tags:
+    - stop
+    - restart
+    - start
+
+- name: copy oracle driver
+  copy:
+    src: "{{ datasources.driver_name }}"
+    dest: "{{ ansible_scripts_directory }}/{{ datasources.driver_name }}"
+    follow: yes
+    mode: 0644
+    owner: "{{ websphere.os_user }}"
+    group: "{{ websphere.os_group }}"
+  tags:
+    - stop
+    - restart
+    - start
+
+- name: cleanup datasources with dmgr
+  shell: "{{ websphere_profiles_path}}/{{ dmgr_profile_name }}/bin/wsadmin.sh \
+    -conntype none -wsadmin_classpath {{ ansible_scripts_directory }}/{{ datasources.driver_name }} \
+    -lang jython -username {{ dmgr_bus_user }} -password {{ dmgr_bus_password }} \
+    -f {{ ansible_scripts_directory }}/cleanup_databases.py"
+  no_log: True
+  when:
+    ( appclusters_state == 'stopped'
+    and nodeagent_state == 'stopped'
+    and dmgr_state == 'stopped' )
+  tags:
+    - stop
+    - start
+    - restart
+...

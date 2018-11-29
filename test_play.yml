@@ -1,0 +1,200 @@
+# test_play.yml
+---
+################################################################################
+#
+# Stop bus
+#
+################################################################################
+- name: Check variables
+  hosts: all
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_become_user: "{{ websphere.os_user }}"
+#    ansible_become_password: "{{ websphere.os_password }}"
+  roles:
+    - role: check_vars
+
+- name: Stop application clusters with dmgr
+  hosts: dmgr
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_become_user: "{{ websphere.os_user }}"
+#    ansible_become_password: "{{ websphere.os_password }}"
+  roles:
+    - role: check_dmgr_process
+    - role: stop_appclusters
+      when:
+        ( dmgr_state == 'running' )
+
+- name: Stop nodeagents
+  hosts: nodes
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_become_user: "{{ websphere.os_user }}"
+#    ansible_become_password: "{{ websphere.os_password }}"
+  roles:
+    - role: check_nodeagent_processes
+    - role: stop_nodeagent
+      when:
+        ( nodeagent_state == 'running' )
+
+- name: Stop dmgr service
+  hosts: dmgr
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_become_user: "{{ websphere.os_user }}"
+#    ansible_become_password: "{{ websphere.os_password }}"
+  roles:
+    - role: check_appcluster_processes
+    - role: check_nodeagent_processes
+    - role: check_dmgr_process
+    - role: stop_dmgr
+      when:
+        ( appclusters_state == 'stopped'
+        and nodeagent_state == 'stopped'
+        and dmgr_state == 'running' )
+################################################################################
+#
+# Cleanup bus
+#
+################################################################################
+- name: Check all processes
+  hosts: all
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_become_user: "{{ websphere.os_user }}"
+#    ansible_become_password: "{{ websphere.os_password }}"
+  roles:
+    - role: check_nodeagent_processes
+
+- name: Check appclusters and dmgr processes
+  hosts: dmgr
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_become_user: "{{ websphere.os_user }}"
+#    ansible_become_password: "{{ websphere.os_password }}"
+  roles:
+    - role: check_appcluster_processes
+    - role: check_dmgr_process
+
+- name: Cleanup nodes temporary files
+  hosts: nodes
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_become_user: "{{ websphere.os_user }}"
+#    ansible_become_password: "{{ websphere.os_password }}"
+  roles:
+    - role: cleanup_profile_temp
+      when:
+        ( nodeagent_state == 'stopped' )
+
+- name: Cleanup dmgr temporary files and datasources
+  hosts: dmgr
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_become_user: "{{ websphere.os_user }}"
+#    ansible_become_password: "{{ websphere.os_password }}"
+  roles:
+    - role: cleanup_profile_temp
+      when:
+        ( appclusters_state == 'stopped'
+        and nodeagent_state == 'stopped'
+        and dmgr_state == 'stopped' )
+    - role: cleanup_datasources
+      when:
+        ( appclusters_state == 'stopped'
+        and nodeagent_state == 'stopped'
+        and dmgr_state == 'stopped' )
+################################################################################
+#
+# Start bus
+#
+################################################################################
+- name: Register special variable for start bus
+  hosts: all
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_become_user: "{{ websphere.os_user }}"
+#    ansible_become_password: "{{ websphere.os_password }}"
+  tasks:
+    - name: Register 'start_bus' variable
+      debug:
+      register: start_bus
+  tags:
+    - start
+    - restart
+
+- name: Check variables
+  hosts: all
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_become_user: "{{ websphere.os_user }}"
+#    ansible_become_password: "{{ websphere.os_password }}"
+  roles:
+    - role: check_vars
+
+- name: Start dmgr service
+  hosts: dmgr
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_become_user: "{{ websphere.os_user }}"
+#    ansible_become_password: "{{ websphere.os_password }}"
+  roles:
+    - role: check_dmgr_process
+    - role: start_dmgr
+      when:
+        ( start_bus is defined 
+        and dmgr_state == 'stopped' )
+
+- name: Start nodeagents
+  hosts: nodes
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_become_user: "{{ websphere.os_user }}"
+#    ansible_become_password: "{{ websphere.os_password }}"
+  roles:
+    - role: check_nodeagent_processes
+    - role: start_nodeagent
+      when:
+        ( start_bus is defined
+        and nodeagent_state == 'stopped' )
+
+- name: Start application clusters with dmgr
+  hosts: dmgr
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_become_user: "{{ websphere.os_user }}"
+#    ansible_become_password: "{{ websphere.os_password }}"
+  roles:
+    - role: check_dmgr_process
+    - role: check_nodeagent_processes
+    - role: check_appcluster_processes
+    - role: start_appclusters
+      when:
+        ( start_bus is defined
+        and dmgr_state == 'running'
+        and nodeagent_state == 'running'
+        and appclusters_state == 'stopped' )
+        
+- name: Cleanup scripts
+  hosts: dmgr
+  vars:
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_become_user: "{{ websphere.os_user }}"
+  roles:
+    - role: cleanup_scripts
+...

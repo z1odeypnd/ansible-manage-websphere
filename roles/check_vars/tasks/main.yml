@@ -1,0 +1,16 @@
+# main.yml
+---
+- name: check defined required variables
+  include_tasks: check_defined_variables.yml
+  tags:
+    - stop
+    - restart
+    - start
+
+- name: check exists required paths
+  include_tasks: check_exists_recommended.yml
+  tags:
+    - stop
+    - restart
+    - start
+...

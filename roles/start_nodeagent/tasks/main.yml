@@ -1,0 +1,14 @@
+# main.yml
+---
+- name: start nodes processes
+  shell: "{{ websphere_profiles_path }}/{{ node_profile_name }}/bin/startNode.sh \
+    -username {{ dmgr_bus_user }} -password {{ dmgr_bus_password }}"
+  no_log: True
+  when:
+    ( start_bus is defined
+    and nodeagent_state == 'stopped' )
+  tags:
+    - start
+    - restart
+    - nodes
+...
