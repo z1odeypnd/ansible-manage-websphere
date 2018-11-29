@@ -142,6 +142,8 @@
 #    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: check_vars
+      when:
+        ( start_bus is defined )
 
 - name: Start dmgr service
   hosts: dmgr
@@ -152,6 +154,8 @@
 #    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: check_dmgr_process
+      when:
+        ( start_bus is defined )
     - role: start_dmgr
       when:
         ( start_bus is defined 
@@ -166,6 +170,8 @@
 #    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: check_nodeagent_processes
+      when:
+        ( start_bus is defined )
     - role: start_nodeagent
       when:
         ( start_bus is defined
@@ -180,8 +186,14 @@
 #    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: check_dmgr_process
+      when:
+        ( start_bus is defined )
     - role: check_nodeagent_processes
+      when:
+        ( start_bus is defined )
     - role: check_appcluster_processes
+      when:
+        ( start_bus is defined )
     - role: start_appclusters
       when:
         ( start_bus is defined
@@ -197,4 +209,6 @@
     ansible_become_user: "{{ websphere.os_user }}"
   roles:
     - role: cleanup_scripts
+  tags:
+    - always
 ...
