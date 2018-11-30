@@ -1,0 +1,15 @@
+---
+all:
+  hosts:
+  children:
+    dmgr:
+      hosts:
+        wsdmgrhost.example.com:
+          dmgr_profile_name: 'dmgr'
+    nodes:
+      hosts:
+        wsnode01host.example.com:
+          node_profile_name: 'node01'
+        wsnode02host.example.com:
+          node_profile_name: 'node02'
+...

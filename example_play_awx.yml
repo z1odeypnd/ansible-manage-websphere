@@ -1,4 +1,4 @@
-# example_play.yml
+# example_play_awx.yml
 ---
 ################################################################################
 #
@@ -7,21 +7,11 @@
 ################################################################################
 - name: Check variables
   hosts: all
-  vars:
-    ansible_become: yes
-    ansible_become_method: su
-    ansible_become_user: "{{ websphere.os_user }}"
-    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: check_vars
 
 - name: Stop application clusters with dmgr
   hosts: dmgr
-  vars:
-    ansible_become: yes
-    ansible_become_method: su
-    ansible_become_user: "{{ websphere.os_user }}"
-    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: check_dmgr_process
     - role: stop_appclusters
@@ -30,11 +20,6 @@
 
 - name: Stop nodeagents
   hosts: nodes
-  vars:
-    ansible_become: yes
-    ansible_become_method: su
-    ansible_become_user: "{{ websphere.os_user }}"
-    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: check_nodeagent_processes
     - role: stop_nodeagent
@@ -43,11 +28,6 @@
 
 - name: Stop dmgr service
   hosts: dmgr
-  vars:
-    ansible_become: yes
-    ansible_become_method: su
-    ansible_become_user: "{{ websphere.os_user }}"
-    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: check_appcluster_processes
     - role: check_nodeagent_processes
@@ -64,32 +44,17 @@
 ################################################################################
 - name: Check all processes
   hosts: all
-  vars:
-    ansible_become: yes
-    ansible_become_method: su
-    ansible_become_user: "{{ websphere.os_user }}"
-    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: check_nodeagent_processes
 
 - name: Check appclusters and dmgr processes
   hosts: dmgr
-  vars:
-    ansible_become: yes
-    ansible_become_method: su
-    ansible_become_user: "{{ websphere.os_user }}"
-    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: check_appcluster_processes
     - role: check_dmgr_process
 
 - name: Cleanup nodes temporary files
   hosts: nodes
-  vars:
-    ansible_become: yes
-    ansible_become_method: su
-    ansible_become_user: "{{ websphere.os_user }}"
-    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: cleanup_profile_temp
       when:
@@ -97,11 +62,6 @@
 
 - name: Cleanup dmgr temporary files and datasources
   hosts: dmgr
-  vars:
-    ansible_become: yes
-    ansible_become_method: su
-    ansible_become_user: "{{ websphere.os_user }}"
-    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: cleanup_profile_temp
       when:
@@ -120,11 +80,6 @@
 ################################################################################
 - name: Register special variable for start bus
   hosts: all
-  vars:
-    ansible_become: yes
-    ansible_become_method: su
-    ansible_become_user: "{{ websphere.os_user }}"
-    ansible_become_password: "{{ websphere.os_password }}"
   tasks:
     - name: Register 'start_bus' variable
       debug:
@@ -135,11 +90,6 @@
 
 - name: Check variables
   hosts: all
-  vars:
-    ansible_become: yes
-    ansible_become_method: su
-    ansible_become_user: "{{ websphere.os_user }}"
-    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: check_vars
       when:
@@ -147,11 +97,6 @@
 
 - name: Start dmgr service
   hosts: dmgr
-  vars:
-    ansible_become: yes
-    ansible_become_method: su
-    ansible_become_user: "{{ websphere.os_user }}"
-    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: check_dmgr_process
       when:
@@ -163,11 +108,6 @@
 
 - name: Start nodeagents
   hosts: nodes
-  vars:
-    ansible_become: yes
-    ansible_become_method: su
-    ansible_become_user: "{{ websphere.os_user }}"
-    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: check_nodeagent_processes
       when:
@@ -179,11 +119,6 @@
 
 - name: Start application clusters with dmgr
   hosts: dmgr
-  vars:
-    ansible_become: yes
-    ansible_become_method: su
-    ansible_become_user: "{{ websphere.os_user }}"
-    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: check_dmgr_process
       when:
@@ -203,11 +138,6 @@
         
 - name: Cleanup scripts
   hosts: dmgr
-  vars:
-    ansible_become: yes
-    ansible_become_method: su
-    ansible_become_user: "{{ websphere.os_user }}"
-    ansible_become_password: "{{ websphere.os_password }}"
   roles:
     - role: cleanup_scripts
   tags:
