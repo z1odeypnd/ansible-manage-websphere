@@ -26,7 +26,6 @@
 
 - name: check applications
   shell: "{{ websphere_profiles_path}}/{{ dmgr_profile_name }}/bin/wsadmin.sh \
-    -conntype none -wsadmin_classpath {{ ansible_scripts_directory }}/{{ datasources.driver_name }} \
     -lang jython -username {{ dmgr_bus_user }} -password {{ dmgr_bus_password }} \
     -f {{ ansible_scripts_directory }}/wsadmin_check_apps_running.py"
   # no_log: True
