@@ -40,9 +40,9 @@
 
 - name: fail if application is stopped
   fail:
-    msg: "FAIL: {{ app_check_result.stdout }}"
+    msg: "FAIL: {{ app_check_result.stdout| search("ansible: WARNING!!!.*") }}"
   when:
-    ( app_check_result.stdout != '')
+    ( app_check_result.stdout | search("ansible: WARNING!!!.*") )
   tags:
     - restart
     - start
