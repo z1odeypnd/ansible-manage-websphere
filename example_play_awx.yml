@@ -137,7 +137,7 @@
         and appclusters_state == 'stopped' )
 
 - name: Check applications state
-  host: dmgr
+  hosts: dmgr
   roles:
     - role: check_applications
       when:
