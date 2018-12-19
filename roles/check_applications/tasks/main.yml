@@ -41,7 +41,7 @@
 
 - name: fail if application is stopped
   fail:
-    msg: "FAIL: {% if 'ansible WARNING!!!'  app_check_result.stdout | regex_search(('ansible WARNING!!!')) }}"
+    msg: "FAIL: {{ app_check_result.stdout | regex_search(('ansible WARNING!!!')) }}"
   when:
     ( app_check_result.stdout is search('ansible WARNING!!!') )
   tags:
