@@ -135,7 +135,17 @@
         and dmgr_state == 'running'
         and nodeagent_state == 'running'
         and appclusters_state == 'stopped' )
-        
+
+- name: Check applications state
+  host: dmgr
+  roles:
+    - role: check_applications
+      when:
+        ( start_bus is defined
+        and dmgr_state == 'running'
+        and nodeagent_state == 'running'
+        and appclusters_state == 'running' )
+
 - name: Cleanup scripts
   hosts: dmgr
   roles:

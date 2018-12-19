@@ -1,0 +1,52 @@
+# main.yml
+---
+- name: create directory for ansible scripts
+  file:
+    path: "{{ ansible_scripts_directory }}"
+    state: directory
+    mode: '0775'
+    unsafe_writes: yes
+  tags:
+    - restart
+    - start
+    - check
+
+- name: copy wsadmin script
+  copy:
+    src: "wsadmin_check_apps_running.py"
+    dest: "{{ ansible_scripts_directory }}/wsadmin_check_apps_running.py"
+    follow: yes
+    mode: 0644
+    owner: "{{ websphere.os_user }}"
+    group: "{{ websphere.os_group }}"
+  tags:
+    - restart
+    - start
+    - check
+
+- name: check applications
+  shell: "{{ websphere_profiles_path}}/{{ dmgr_profile_name }}/bin/wsadmin.sh \
+    -conntype none -wsadmin_classpath {{ ansible_scripts_directory }}/{{ datasources.driver_name }} \
+    -lang jython -username {{ dmgr_bus_user }} -password {{ dmgr_bus_password }} \
+    -f {{ ansible_scripts_directory }}/wsadmin_check_apps_running.py"
+  # no_log: True
+  register: app_check_result
+  when:
+    ( appclusters_state == 'running'
+    and nodeagent_state == 'running'
+    and dmgr_state == 'running' )
+  tags:
+    - restart
+    - start
+    - check
+
+- name: fail if application is stopped
+  fail:
+    msg: "FAIL: {{ app_check_result.stdout }}"
+  when:
+    ( app_check_result.stdout != '')
+  tags:
+    - restart
+    - start
+    - check
+...
