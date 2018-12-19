@@ -48,7 +48,7 @@ def main():
     stopped_apps = get_stopped_apps(application_deployments_list)
     if stopped_apps:
         for stopped_app in stopped_apps:
-            print("ansible: WARNING!!! Appication '%s' not running!" % stopped_app)
+            print("ansible WARNING!!! Appication '%s' not running!" % stopped_app)
             rc = 1
     return rc
 
