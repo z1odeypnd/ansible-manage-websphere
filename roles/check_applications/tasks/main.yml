@@ -32,8 +32,7 @@
   # no_log: True
   register: app_check_result
   when:
-    ( appclusters_state == 'running'
-    and nodeagent_state == 'running'
+    ( nodeagent_state == 'running'
     and dmgr_state == 'running' )
   tags:
     - restart

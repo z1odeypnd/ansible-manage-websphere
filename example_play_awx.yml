@@ -147,8 +147,7 @@
       when:
         ( start_bus is defined
         and dmgr_state == 'running'
-        and nodeagent_state == 'running'
-        and appclusters_state == 'running' )
+        and nodeagent_state == 'running' )
 
 - name: Cleanup scripts
   hosts: dmgr
