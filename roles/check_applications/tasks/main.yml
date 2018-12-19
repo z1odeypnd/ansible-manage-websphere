@@ -30,6 +30,7 @@
     -f {{ ansible_scripts_directory }}/wsadmin_check_apps_running.py"
   # no_log: True
   register: app_check_result
+  ignore_errors: yes
   when:
     ( nodeagent_state == 'running'
     and dmgr_state == 'running' )
