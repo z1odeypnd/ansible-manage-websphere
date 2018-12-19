@@ -139,6 +139,10 @@
 - name: Check applications state
   hosts: dmgr
   roles:
+    - role: check_dmgr_process
+    - role: check_nodeagent_processes
+    - role: check_appcluster_processes
+    - role: start_appclusters
     - role: check_applications
       when:
         ( start_bus is defined
