@@ -41,7 +41,7 @@
 
 - name: fail if application is stopped
   fail:
-    msg: "FAIL: {% for jinja_line in app_check_result.stdout_lines %}{% if jinja_line is('ansible WARNING!!!') %}jinja_line{% endif %}{% endfor %}"
+    msg: "FAIL: {% for jinja_line in app_check_result.stdout_lines %}{% if jinja_line is search('ansible WARNING!!!') %}jinja_line{% endif %}{% endfor %}"
   when:
     ( app_check_result.stdout is search('ansible WARNING!!!') )
   tags:
