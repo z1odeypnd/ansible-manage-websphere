@@ -29,9 +29,9 @@
 - name: Stop dmgr service
   hosts: dmgr
   roles:
+    - role: check_dmgr_process
     - role: check_appclusters
     - role: check_nodeagent_processes
-    - role: check_dmgr_process
     - role: stop_dmgr
       when:
         ( appclusters_state == 'stopped'
@@ -145,7 +145,6 @@
     - role: check_dmgr_process
     - role: check_nodeagent_processes
     - role: check_appclusters
-    - role: start_appclusters
     - role: check_applications
       when:
         ( start_bus is defined
