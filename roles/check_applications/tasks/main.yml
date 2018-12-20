@@ -32,9 +32,12 @@
   register: app_check_result
   ignore_errors: yes
   when:
-    ( nodeagent_state == 'running'
+    ( start_bus is defined
+    and nodeagent_state == 'running'
     and dmgr_state == 'running' )
-  failed_when: app_check_result.rc != 0 and app_check_result.rc != 42
+  failed_when: 
+    ( app_check_result.rc != 0 
+    and app_check_result.rc != 42 )
   tags:
     - restart
     - start
@@ -44,6 +47,8 @@
   fail:
     msg: "{% for jinja_line in app_check_result.stdout_lines %}{% if jinja_line is search('ansible WARNING!!!') %}FATAL: {{ jinja_line }}{% endif %}{% endfor %}"
   when:
+    ( app_check_result is defined )
+  failed_when:
     ( app_check_result.stdout is search('ansible WARNING!!!') )
   tags:
     - restart
