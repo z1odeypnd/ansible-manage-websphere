@@ -36,6 +36,9 @@
   no_log: True
   register: appcl_check_result
   ignore_errors: yes
+  failed_when:
+    ( appcl_check_result.rc != 0
+    and appcl_check_result.rc != 105 )
   tags:
     - stop
     - restart
@@ -69,7 +72,8 @@
   set_fact:
     appclusters_state: 'stopped'
   when:
-    ( appcl_check_result.stdout is search(' cluster is stopped!') )
+    ( appcl_check_result.stdout is search(' cluster is stopped!')
+    or 'WASX8011W: AdminTask object is not available.' in appcl_check_result.stdout_lines )
   tags:
     - stop
     - restart
