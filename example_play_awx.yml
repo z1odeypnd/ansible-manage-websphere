@@ -53,7 +53,7 @@
     - role: check_dmgr_process
     - role: check_appclusters
       when:
-        ( dmgr_state == 'stopped' )
+        ( dmgr_state == 'running' )
 
 - name: Cleanup nodes temporary files
   hosts: nodes
