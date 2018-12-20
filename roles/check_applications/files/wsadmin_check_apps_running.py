@@ -9,9 +9,11 @@ def get_deployments_list():
         application_deployment_dict = {}
         application_deployment_dict['object'] = application_deployment
         application_deployment_dict['object_name'] = str(AdminConfig.getObjectName(application_deployment))
+        # Skip if object_name is blank
         if not application_deployment_dict['object_name']:
             continue
         application_deployment_dict['app_name'] = (AdminConfig.showAttribute(application_deployment, 'binariesURL').split('/')[-1]).split('.ear')[0]
+        # Skip if app_name is variable like ${VAR_NAME}
         if application_deployment_dict['app_name'].endswith('}'):
             continue
         for deployment_target in AdminConfig.list('DeploymentTargetMapping', application_deployment).split('\n'):
@@ -33,9 +35,12 @@ def get_stopped_apps(application_deployments_list):
     for app in application_deployments_list:
         if app['app_name'] in app_list:
             mbean = AdminControl.queryNames('type=Application,name=%s,*' % app['app_name'])
+            # if mbean not blan - application is running
             if mbean:
                 pass
+            # else - application not running
             else:
+                # if application enabled than append to 'stopped_apps' list
                 if app['enabled'] == 'true':
                     stopped_apps.append(app['app_name'])
     return stopped_apps
@@ -47,8 +52,8 @@ def main():
     stopped_apps = get_stopped_apps(application_deployments_list)
     if stopped_apps:
         for stopped_app in stopped_apps:
-            print("ansible WARNING!!! Appication '%s' not running!" % stopped_app)
-            rc = 1
+            print("ansible WARNING!!! Appication '%s' enabled but not running!" % stopped_app)
+            rc = 42
     return rc
 
 
