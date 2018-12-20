@@ -82,8 +82,8 @@
   hosts: all
   tasks:
     - name: Register 'start_bus' variable
-      debug:
-      register: start_bus
+      set_fact:
+        start_bus: True
   tags:
     - start
     - restart
