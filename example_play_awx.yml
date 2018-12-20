@@ -31,6 +31,8 @@
   roles:
     - role: check_dmgr_process
     - role: check_appclusters
+      when:
+        ( dmgr_state == 'running' )
     - role: check_nodeagent_processes
     - role: stop_dmgr
       when:
@@ -145,6 +147,8 @@
     - role: check_dmgr_process
     - role: check_nodeagent_processes
     - role: check_appclusters
+      when:
+        ( dmgr_state == 'running' )
     - role: check_applications
       when:
         ( start_bus is defined
