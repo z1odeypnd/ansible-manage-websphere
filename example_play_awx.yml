@@ -52,8 +52,6 @@
   roles:
     - role: check_dmgr_process
     - role: check_appclusters
-      when:
-        ( dmgr_state == 'running' )
 
 - name: Cleanup nodes temporary files
   hosts: nodes
@@ -130,8 +128,7 @@
         ( start_bus is defined )
     - role: check_appclusters
       when:
-        ( start_bus is defined 
-        and dmgr_state == 'running' )
+        ( start_bus is defined )
     - role: start_appclusters
       when:
         ( start_bus is defined
@@ -145,13 +142,12 @@
     - role: check_dmgr_process
     - role: check_nodeagent_processes
     - role: check_appclusters
-      when:
-        ( dmgr_state == 'running' )
     - role: check_applications
       when:
         ( start_bus is defined
         and dmgr_state == 'running'
-        and nodeagent_state == 'running' )
+        and nodeagent_state == 'running'
+        and appclusters_state == 'running' )
 
 - name: Cleanup scripts
   hosts: dmgr
