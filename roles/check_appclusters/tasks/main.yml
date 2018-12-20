@@ -46,15 +46,6 @@
     - check
     - appclusters
 
-- name: debug
-  debug:
-    msg: "{{ appcl_check_result }}"
-  tags:
-    - stop
-    - restart
-    - start
-    - check
-    - appclusters
 
 - name: define appclusters is running
   set_fact:
@@ -73,7 +64,7 @@
     appclusters_state: 'stopped'
   when:
     ( appcl_check_result.stdout is search(' cluster is stopped!')
-    or 'WASX8011W: AdminTask object is not available.' in appcl_check_result.stdout_lines )
+    or appcl_check_result.stdout is search('AdminTask object is not available.') )
   tags:
     - stop
     - restart
