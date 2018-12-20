@@ -32,7 +32,6 @@ def get_stopped_apps(application_deployments_list):
     app_list = AdminApp.list().split('\n')
     for app in application_deployments_list:
         if app['app_name'] in app_list:
-            running = ''
             mbean = AdminControl.queryNames('type=Application,name=%s,*' % app['app_name'])
             if mbean:
                 pass

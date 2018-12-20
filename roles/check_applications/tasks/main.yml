@@ -28,7 +28,7 @@
   shell: "{{ websphere_profiles_path}}/{{ dmgr_profile_name }}/bin/wsadmin.sh \
     -lang jython -username {{ dmgr_bus_user }} -password {{ dmgr_bus_password }} \
     -f {{ ansible_scripts_directory }}/wsadmin_check_apps_running.py"
-  # no_log: True
+  no_log: True
   register: app_check_result
   ignore_errors: yes
   when:
@@ -39,9 +39,9 @@
     - start
     - check
 
-- name: fail if application is stopped
+- name: fail if enabled application is stopped
   fail:
-    msg: "FAIL: {% for jinja_line in app_check_result.stdout_lines %}{% if jinja_line is search('ansible WARNING!!!') %}{{ jinja_line }}{% endif %}{% endfor %}"
+    msg: "FAIL: {% for jinja_line in app_check_result.stdout_lines %}{% if jinja_line is search('ansible WARNING!!!') %}FAIL: {{ jinja_line }}{% endif %}{% endfor %}"
   when:
     ( app_check_result.stdout is search('ansible WARNING!!!') )
   tags:
