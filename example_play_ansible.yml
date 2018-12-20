@@ -1,4 +1,4 @@
-# example_play.yml
+# example_play_ansible.yml
 ---
 ################################################################################
 #
@@ -49,9 +49,9 @@
     ansible_become_user: "{{ websphere.os_user }}"
     ansible_become_password: "{{ websphere.os_password }}"
   roles:
-    - role: check_appcluster_processes
-    - role: check_nodeagent_processes
     - role: check_dmgr_process
+    - role: check_appclusters
+    - role: check_nodeagent_processes
     - role: stop_dmgr
       when:
         ( appclusters_state == 'stopped'
@@ -80,8 +80,8 @@
     ansible_become_user: "{{ websphere.os_user }}"
     ansible_become_password: "{{ websphere.os_password }}"
   roles:
-    - role: check_appcluster_processes
     - role: check_dmgr_process
+    - role: check_appclusters
 
 - name: Cleanup nodes temporary files
   hosts: nodes
@@ -127,8 +127,8 @@
     ansible_become_password: "{{ websphere.os_password }}"
   tasks:
     - name: Register 'start_bus' variable
-      debug:
-      register: start_bus
+      set_fact:
+        start_bus: True
   tags:
     - start
     - restart
@@ -191,7 +191,7 @@
     - role: check_nodeagent_processes
       when:
         ( start_bus is defined )
-    - role: check_appcluster_processes
+    - role: check_appclusters
       when:
         ( start_bus is defined )
     - role: start_appclusters
@@ -200,7 +200,20 @@
         and dmgr_state == 'running'
         and nodeagent_state == 'running'
         and appclusters_state == 'stopped' )
-        
+
+- name: Check applications state
+  hosts: dmgr
+  roles:
+    - role: check_dmgr_process
+    - role: check_nodeagent_processes
+    - role: check_appclusters
+    - role: check_applications
+      when:
+        ( start_bus is defined
+        and dmgr_state == 'running'
+        and nodeagent_state == 'running'
+        and appclusters_state == 'running' )
+
 - name: Cleanup scripts
   hosts: dmgr
   vars:
