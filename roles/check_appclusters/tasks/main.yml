@@ -49,7 +49,7 @@
     appclusters_state: 'running'
   when:
     ( appcl_check_result is defined )
-    and ( appcl_check_result.stdout is search(' cluster is running!') )
+    and ( appcl_check_result.stdout is search('cluster is running!') )
   tags:
     - stop
     - restart
@@ -62,7 +62,7 @@
     appclusters_state: 'stopped'
   when:
     ( appcl_check_result is defined )
-    and ( appcl_check_result.stdout is search(' cluster is stopped!') )
+    and ( appcl_check_result.stdout is search('cluster is stopped!') )
   tags:
     - stop
     - restart
