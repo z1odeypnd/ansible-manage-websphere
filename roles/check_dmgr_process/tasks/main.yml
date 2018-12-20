@@ -4,6 +4,8 @@
   shell: ps -aef | egrep "java.*{{ websphere_profiles_path }}/{{ dmgr_profile_name }}.*{{ dmgr_profile_name }}.*$" | grep -v grep
   register: dmgr_proc_search
   ignore_errors: yes
+  failed_when: 
+    ( dmgr_proc_search.rc > 1 )
   tags:
     - stop
     - restart

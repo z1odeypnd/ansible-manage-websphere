@@ -1,0 +1,57 @@
+# main.yml
+---
+- name: create directory for ansible scripts
+  file:
+    path: "{{ ansible_scripts_directory }}"
+    state: directory
+    mode: '0775'
+    unsafe_writes: yes
+  tags:
+    - restart
+    - start
+    - check
+
+- name: copy wsadmin script
+  copy:
+    src: "wsadmin_check_apps_running.py"
+    dest: "{{ ansible_scripts_directory }}/wsadmin_check_apps_running.py"
+    follow: yes
+    mode: 0644
+    owner: "{{ websphere.os_user }}"
+    group: "{{ websphere.os_group }}"
+  tags:
+    - restart
+    - start
+    - check
+
+- name: check applications
+  shell: "{{ websphere_profiles_path}}/{{ dmgr_profile_name }}/bin/wsadmin.sh \
+    -lang jython -username {{ dmgr_bus_user }} -password {{ dmgr_bus_password }} \
+    -f {{ ansible_scripts_directory }}/wsadmin_check_apps_running.py"
+  no_log: True
+  register: app_check_result
+  ignore_errors: yes
+  when:
+    ( start_bus is defined
+    and nodeagent_state == 'running'
+    and dmgr_state == 'running' )
+  failed_when: 
+    ( app_check_result.rc != 0 
+    and app_check_result.rc != 42 )
+  tags:
+    - restart
+    - start
+    - check
+
+- name: fail if enabled application is stopped
+  fail:
+    msg: "{% for jinja_line in app_check_result.stdout_lines %}{% if jinja_line is search('ansible WARNING!!!') %}FATAL: {{ jinja_line }}{% endif %}{% endfor %}"
+  when:
+    ( app_check_result is defined )
+  failed_when:
+    ( app_check_result.stdout is search('ansible WARNING!!!') )
+  tags:
+    - restart
+    - start
+    - check
+...

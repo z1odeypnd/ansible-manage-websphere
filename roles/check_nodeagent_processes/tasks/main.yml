@@ -4,6 +4,8 @@
   shell: ps -aef | egrep "java.*{{ websphere_profiles_path }}/{{ node_profile_name }}.*{{ node_profile_name }}.*nodeagent$" | grep -v grep
   register: nodes_proc_search
   ignore_errors: yes
+  failed_when:
+    ( nodes_proc_search.rc > 1 )
   tags:
     - stop
     - restart
