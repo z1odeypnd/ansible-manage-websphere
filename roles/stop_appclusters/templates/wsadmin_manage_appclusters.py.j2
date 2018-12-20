@@ -1,4 +1,5 @@
 # {{ ansible_managed }}
+# -*- coding: utf-8 -*-
 import time
 import java.lang
 import re
@@ -17,7 +18,6 @@ def get_started_clusters():
             None
         else:
             appcluster_list.remove(cluster_obj)
-
     return appcluster_list
 
 
@@ -49,7 +49,7 @@ def stop_clusters(running_clusters, app_clusters_stop_order):
                         time.sleep(10)
                     else:
                         break
-# Last - stop cluster which not found in 'app_clusters_start_order' variable
+        # Last - stop cluster which not found in 'app_clusters_start_order' variable
         for cluster_obj in running_clusters:
             cluster_name = AdminControl.getAttribute(cluster_obj, 'clusterName')
             if cluster_name == app_clusters_order:
@@ -79,7 +79,7 @@ def start_clusters(stopped_clusters, app_clusters_start_order):
                         time.sleep(10)
                     else:
                         break
-# Last - start cluster which not found in 'app_clusters_start_order' variable
+        # Last - start cluster which not found in 'app_clusters_start_order' variable
         for cluster_obj in stopped_clusters:
             cluster_name = AdminControl.getAttribute(cluster_obj, 'clusterName')
             if cluster_name == app_clusters_order:
@@ -99,14 +99,13 @@ def main():
     app_clusters_start_order = [{% for jinja_cluster in appclusters %}'{{ jinja_cluster.cluster_name }}'{% if jinja_cluster.cluster_name != appclusters[-1].cluster_name %},{% endif %}{% endfor %}]
     app_clusters_stop_order = app_clusters_start_order[:]
     app_clusters_stop_order.reverse()
-#    print("app_clusters_stop_order: %s" % app_clusters_stop_order)
-#    print("app_clusters_start_order: %s" % app_clusters_start_order)
-    available_commands=['start','stop']
+    available_commands=['start','stop','check']
     try:
         command = sys.argv[0]
     except:
         pass
-    if not command in available_commands:
+    
+    if command not in available_commands:
         print("ERROR! Available commands:\n%s" % available_commands)
         return 1
     
@@ -117,6 +116,14 @@ def main():
     if command == 'start':
         stopped_clusters = get_stopped_clusters()
         start_clusters(stopped_clusters, app_clusters_start_order)
+    
+    if command == 'check':
+        running_clusters = get_started_clusters()
+        stopped_clusters = get_stopped_clusters()
+        if running_clusters:
+            print("ansible WARNING!!! '%s' cluster is running!")
+        if stopped_clusters:
+            print("ansible WARNING!!! '%s' cluster is stopped!")
 
-main()
 
+sys.exit(main())

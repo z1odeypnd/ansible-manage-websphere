@@ -29,7 +29,7 @@
 - name: Stop dmgr service
   hosts: dmgr
   roles:
-    - role: check_appcluster_processes
+    - role: check_appclusters
     - role: check_nodeagent_processes
     - role: check_dmgr_process
     - role: stop_dmgr
@@ -50,8 +50,10 @@
 - name: Check appclusters and dmgr processes
   hosts: dmgr
   roles:
-    - role: check_appcluster_processes
     - role: check_dmgr_process
+    - role: check_appclusters
+      when:
+        ( dmgr_state == 'stopped' )
 
 - name: Cleanup nodes temporary files
   hosts: nodes
@@ -126,9 +128,10 @@
     - role: check_nodeagent_processes
       when:
         ( start_bus is defined )
-    - role: check_appcluster_processes
+    - role: check_appclusters
       when:
-        ( start_bus is defined )
+        ( start_bus is defined 
+        and dmgr_state == 'running' )
     - role: start_appclusters
       when:
         ( start_bus is defined
@@ -141,7 +144,7 @@
   roles:
     - role: check_dmgr_process
     - role: check_nodeagent_processes
-    - role: check_appcluster_processes
+    - role: check_appclusters
     - role: start_appclusters
     - role: check_applications
       when:
