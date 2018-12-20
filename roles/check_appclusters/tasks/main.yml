@@ -35,13 +35,24 @@
     -f {{ ansible_scripts_directory }}/wsadmin_manage_appclusters.py check"
   no_log: True
   register: appcl_check_result
+  ignore_errors: yes
   tags:
     - stop
     - restart
     - start
     - check
     - appclusters
-    
+
+- name: debug
+  debug:
+    msg: "{{ appcl_check_result }}"
+  tags:
+    - stop
+    - restart
+    - start
+    - check
+    - appclusters
+
 - name: define appclusters is running
   set_fact:
     appclusters_state: 'running'
