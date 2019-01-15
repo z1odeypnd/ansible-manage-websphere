@@ -1,0 +1,3 @@
+---
+node_profile_name: 'node02'
+...
